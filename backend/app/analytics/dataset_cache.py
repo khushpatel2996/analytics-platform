@@ -29,6 +29,7 @@ class DatasetCacheService:
                     cls._instance = super(DatasetCacheService, cls).__new__(cls)
                     cls._instance._cache = {}
                     cls._instance._max_items = 20
+                    cls._instance._current_data_model = None
         return cls._instance
 
     def register(
@@ -54,10 +55,52 @@ class DatasetCacheService:
                 "detected_columns": detected_columns,
                 "capabilities": capabilities,
                 "file_metadata": file_metadata,
+                "analysis": None,
                 "timestamp": time.time(),
             }
             logger.info(f"Registered dataset {ds_id} ({len(df)} rows, {len(df.columns)} cols) in cache.")
             return ds_id
+
+    def set_dataset_analysis(self, dataset_id: str, analysis: Any) -> None:
+        """Stores the precomputed generic intelligence analysis for a dataset."""
+        with self._lock:
+            entry = self._cache.get(dataset_id)
+            if entry:
+                entry["analysis"] = analysis
+                if hasattr(analysis, "detected_columns") and analysis.detected_columns:
+                    entry["detected_columns"] = analysis.detected_columns
+                if hasattr(analysis, "capabilities") and analysis.capabilities:
+                    entry["capabilities"] = analysis.capabilities
+
+    def get_dataset_analysis(self, dataset_id: str) -> Optional[Any]:
+        """Retrieves the precomputed generic intelligence analysis for a dataset."""
+        with self._lock:
+            entry = self._cache.get(dataset_id)
+            if entry:
+                return entry.get("analysis")
+            return None
+
+    def register_dataset(
+        self,
+        df: pd.DataFrame,
+        profile: DatasetProfileResponse,
+        file_metadata: FileMetadata,
+        dataset_id: str,
+    ) -> str:
+        """Stores an individual dataset from multi-upload in session cache."""
+        with self._lock:
+            if len(self._cache) >= self._max_items:
+                oldest_id = min(self._cache.keys(), key=lambda k: self._cache[k]["timestamp"])
+                del self._cache[oldest_id]
+
+            self._cache[dataset_id] = {
+                "df": df.copy(),
+                "profile": profile,
+                "file_metadata": file_metadata,
+                "timestamp": time.time(),
+            }
+            logger.info(f"Registered multi dataset {dataset_id} ({len(df)} rows) in cache.")
+            return dataset_id
 
     def get(self, dataset_id: str) -> Optional[Dict[str, Any]]:
         """Retrieves dataset entry by ID, updating its access timestamp."""
@@ -67,6 +110,57 @@ class DatasetCacheService:
                 entry["timestamp"] = time.time()
                 return entry
             return None
+
+    def get_multiple(self, dataset_ids: List[str]) -> List[Dict[str, Any]]:
+        """Retrieves multiple dataset entries by IDs."""
+        with self._lock:
+            results = []
+            for ds_id in dataset_ids:
+                entry = self._cache.get(ds_id)
+                if entry:
+                    entry["timestamp"] = time.time()
+                    results.append({"dataset_id": ds_id, **entry})
+            return results
+
+    def get_all_datasets(self) -> List[Dict[str, Any]]:
+        """Retrieves all active tabular datasets in session cache."""
+        with self._lock:
+            results = []
+            for ds_id, entry in self._cache.items():
+                if "df" in entry:
+                    results.append({"dataset_id": ds_id, **entry})
+            return results
+
+    def set_data_model(self, model: Any) -> None:
+        """Stores the active validated Data Model in cache."""
+        with self._lock:
+            self._current_data_model = model
+
+    def get_data_model(self) -> Optional[Any]:
+        """Retrieves the active validated Data Model from cache."""
+        with self._lock:
+            return getattr(self, "_current_data_model", None)
+
+    def clear_data_model(self) -> None:
+        """Clears the active Data Model."""
+        with self._lock:
+            self._current_data_model = None
+
+    def set_cross_dataset_analytics(self, analytics: Any) -> None:
+        """Stores the active Cross-Dataset Analytics response in cache."""
+        with self._lock:
+            self._current_cross_analytics = analytics
+
+    def get_cross_dataset_analytics(self) -> Optional[Any]:
+        """Retrieves the active Cross-Dataset Analytics response from cache."""
+        with self._lock:
+            return getattr(self, "_current_cross_analytics", None)
+
+    def clear_cross_dataset_analytics(self) -> None:
+        """Clears the active Cross-Dataset Analytics from cache."""
+        with self._lock:
+            self._current_cross_analytics = None
+
 
     @classmethod
     def filter_dataframe(

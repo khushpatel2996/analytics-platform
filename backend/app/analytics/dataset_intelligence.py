@@ -71,7 +71,17 @@ class DatasetIntelligenceEngine:
         if non_null.empty or total_rows < 3:
             return False, 0.0, None
 
-        unique_count = non_null.nunique()
+        # Unhashable nested structures (dicts, lists) cannot be identifier keys
+        sample_raw = non_null.head(50)
+        if any(isinstance(v, (dict, list, set)) for v in sample_raw):
+            return False, 0.0, None
+
+        try:
+            unique_count = non_null.nunique()
+        except TypeError:
+            safe_s = DatasetProfiler.safe_non_null_series(non_null)
+            unique_count = safe_s.nunique()
+
         unique_ratio = unique_count / len(non_null)
         tokens = set(cls.tokenize(col_name))
         lower_name = col_name.lower().strip()
@@ -131,8 +141,13 @@ class DatasetIntelligenceEngine:
         if non_null.empty:
             return "text", False, "Empty column"
 
+        # Safe non-null representation
+        safe_non_null = DatasetProfiler.safe_non_null_series(non_null)
+        if safe_non_null.empty:
+            return "text", False, "Empty column"
+
         if s.dtype == "object":
-            unique_vals = set(non_null.unique())
+            unique_vals = set(safe_non_null)
             if unique_vals.issubset({True, False, "true", "false", "True", "False", "yes", "no", "Yes", "No", 0, 1}):
                 return "boolean", False, "Boolean values subset"
 
@@ -149,11 +164,11 @@ class DatasetIntelligenceEngine:
             return "numeric", False, "Numeric numeric dtype"
 
         # Categorical vs Text
-        unique_count = non_null.nunique()
-        str_series = non_null.astype(str).str.strip()
+        unique_count = safe_non_null.nunique()
+        str_series = safe_non_null.astype(str).str.strip()
         avg_len = str_series.str.len().mean() if not str_series.empty else 0
         avg_words = str_series.str.split().str.len().mean() if not str_series.empty else 0
-        unique_ratio = unique_count / len(non_null) if len(non_null) > 0 else 0.0
+        unique_ratio = unique_count / len(safe_non_null) if len(safe_non_null) > 0 else 0.0
 
         if isinstance(s.dtype, pd.CategoricalDtype):
             return "categorical", False, "Categorical dtype"
@@ -163,7 +178,7 @@ class DatasetIntelligenceEngine:
         if tokens.intersection(text_keywords) or avg_words >= 3.0 or avg_len > 45:
             return "text", False, "Multi-word free text content"
 
-        if unique_count <= 100 and (unique_ratio <= 0.5 or len(non_null) <= 20 or avg_words <= 2.0):
+        if unique_count <= 100 and (unique_ratio <= 0.5 or len(safe_non_null) <= 20 or avg_words <= 2.0):
             return "categorical", False, "Discrete categorical cardinality"
 
         return "text", False, "General text dimension"
@@ -694,6 +709,7 @@ class DatasetIntelligenceEngine:
         df: pd.DataFrame,
         profile: DatasetProfileResponse,
         file_metadata: FileMetadata,
+        dataset_id: Optional[str] = None,
     ) -> DatasetAnalysisResponse:
         """
         Executes end-to-end generic dataset intelligence analysis.
@@ -726,12 +742,13 @@ class DatasetIntelligenceEngine:
         modules = cls.generate_modules(detected_columns, capabilities)
         analytics = StatisticalCalculator.compute(df, detected_columns, capabilities, profile)
         available_filters = StatisticalCalculator.extract_filter_options(df, detected_columns)
-        dataset_id = dataset_cache.register(
+        actual_dataset_id = dataset_cache.register(
             df=df,
             profile=profile,
             detected_columns=detected_columns,
             capabilities=capabilities,
             file_metadata=file_metadata,
+            dataset_id=dataset_id,
         )
 
         response_dict = {
@@ -747,11 +764,11 @@ class DatasetIntelligenceEngine:
             "capabilities": capabilities.model_dump(),
             "modules": [m.model_dump() for m in modules],
             "analytics": analytics.model_dump(),
-            "dataset_id": dataset_id,
+            "dataset_id": actual_dataset_id,
             "available_filters": [f.model_dump() for f in available_filters],
         }
 
-        return DatasetAnalysisResponse(
+        res = DatasetAnalysisResponse(
             success=True,
             file=file_metadata,
             dataset=profile.dataset,
@@ -761,7 +778,9 @@ class DatasetIntelligenceEngine:
             capabilities=capabilities,
             modules=modules,
             analytics=analytics,
-            dataset_id=dataset_id,
+            dataset_id=actual_dataset_id,
             available_filters=available_filters,
             data=response_dict,
         )
+        dataset_cache.set_dataset_analysis(actual_dataset_id, res)
+        return res

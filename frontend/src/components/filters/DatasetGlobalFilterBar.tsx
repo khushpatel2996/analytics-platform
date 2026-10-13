@@ -118,7 +118,7 @@ export function DatasetGlobalFilterBar() {
           {/* Search box if > 4 options */}
           {(filter.options?.length || 0) > 4 && (
             <div className="relative">
-              <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-slate-400" />
+              <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-slate-400 dark:text-slate-500" />
               <input
                 type="text"
                 placeholder={`Search ${filter.label}...`}
@@ -129,54 +129,54 @@ export function DatasetGlobalFilterBar() {
                     [filter.column]: e.target.value,
                   }))
                 }
-                className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-hidden focus:border-blue-500"
+                className="w-full pl-8 pr-3 py-1.5 bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700/80 rounded-lg text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-hidden focus:border-blue-500 dark:focus:border-blue-400 transition-colors"
               />
             </div>
           )}
 
-          <div className="flex items-center justify-between text-[11px] text-slate-500 pb-1.5 border-b border-slate-100">
-            <span className="font-medium text-slate-400">
+          <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 pb-1.5 border-b border-slate-100 dark:border-slate-700/60">
+            <span className="font-medium text-slate-400 dark:text-slate-500">
               {selectedVals.length} selected
             </span>
             <div className="flex items-center gap-2.5">
               <button
                 type="button"
                 onClick={() => selectAllCategorical(filter)}
-                className="font-semibold text-blue-600 hover:underline cursor-pointer"
+                className="font-medium text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
               >
                 Select All
               </button>
               <button
                 type="button"
                 onClick={() => clearCategorical(filter.column)}
-                className="text-slate-500 hover:underline cursor-pointer"
+                className="text-slate-500 dark:text-slate-400 hover:underline cursor-pointer"
               >
                 Clear
               </button>
             </div>
           </div>
 
-          <div className={cn("overflow-y-auto space-y-1 pr-1", isInsideDrawer ? "max-h-72" : "max-h-52")}>
+          <div className={cn("overflow-y-auto space-y-0.5 pr-1", isInsideDrawer ? "max-h-72" : "max-h-52")}>
             {filteredOptions.length === 0 ? (
-              <div className="py-4 text-center text-xs text-slate-400">No matching options</div>
+              <div className="py-4 text-center text-xs text-slate-400 dark:text-slate-500">No matching options</div>
             ) : (
               filteredOptions.map((opt) => {
                 const isSelected = selectedVals.includes(opt.value);
                 return (
                   <label
                     key={opt.value}
-                    className="flex items-center justify-between py-1.5 px-2 rounded-md hover:bg-slate-50 cursor-pointer select-none transition-colors"
+                    className="flex items-center justify-between py-1 px-2 rounded-md hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer select-none transition-colors"
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       <input
                         type="checkbox"
                         checked={isSelected}
                         onChange={() => toggleCategoricalOption(filter.column, opt.value)}
-                        className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                        className="rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500 cursor-pointer bg-white dark:bg-slate-800"
                       />
-                      <span className="truncate text-slate-800 text-xs">{opt.value}</span>
+                      <span className="truncate text-slate-800 dark:text-slate-200 text-xs">{opt.value}</span>
                     </div>
-                    <span className="text-[10px] text-slate-400 font-mono shrink-0 ml-2">
+                    <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono shrink-0 ml-2">
                       {formatNumber(opt.count)}
                     </span>
                   </label>
@@ -192,16 +192,16 @@ export function DatasetGlobalFilterBar() {
       const currentVal = activeFilters[filter.column];
       return (
         <div className="space-y-3">
-          <div className="text-[11px] font-semibold text-slate-500">Filter by value:</div>
-          <div className="grid grid-cols-3 gap-1.5 bg-slate-100 p-1 rounded-lg">
+          <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400">Filter by value:</div>
+          <div className="grid grid-cols-3 gap-1 bg-slate-100 dark:bg-slate-900/80 p-1 rounded-lg border border-slate-200/50 dark:border-slate-700/60">
             <button
               type="button"
               onClick={() => removeFilter(filter.column)}
               className={cn(
-                "py-1.5 text-xs font-semibold rounded-md transition-all",
+                "py-1 text-xs font-medium rounded-md transition-all cursor-pointer",
                 currentVal === undefined || currentVal === null
-                  ? "bg-white text-slate-900 shadow-2xs"
-                  : "text-slate-600 hover:text-slate-900"
+                  ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-2xs font-semibold"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
               )}
             >
               All
@@ -210,10 +210,10 @@ export function DatasetGlobalFilterBar() {
               type="button"
               onClick={() => setFilter(filter.column, true)}
               className={cn(
-                "py-1.5 text-xs font-semibold rounded-md transition-all",
+                "py-1 text-xs font-medium rounded-md transition-all cursor-pointer",
                 currentVal === true
-                  ? "bg-emerald-600 text-white shadow-2xs font-bold"
-                  : "text-slate-600 hover:text-slate-900"
+                  ? "bg-emerald-600 text-white shadow-2xs font-semibold"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
               )}
             >
               True / Yes
@@ -222,10 +222,10 @@ export function DatasetGlobalFilterBar() {
               type="button"
               onClick={() => setFilter(filter.column, false)}
               className={cn(
-                "py-1.5 text-xs font-semibold rounded-md transition-all",
+                "py-1 text-xs font-medium rounded-md transition-all cursor-pointer",
                 currentVal === false
-                  ? "bg-rose-600 text-white shadow-2xs font-bold"
-                  : "text-slate-600 hover:text-slate-900"
+                  ? "bg-rose-600 text-white shadow-2xs font-semibold"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
               )}
             >
               False / No
@@ -249,15 +249,15 @@ export function DatasetGlobalFilterBar() {
       return (
         <div className="space-y-3">
           {filter.min_date && filter.max_date && (
-            <div className="text-[11px] font-semibold text-slate-500 flex items-center justify-between">
+            <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400 flex items-center justify-between">
               <span>Bounds:</span>
-              <span className="font-mono text-slate-700">{filter.min_date} → {filter.max_date}</span>
+              <span className="font-mono text-slate-700 dark:text-slate-300">{filter.min_date} → {filter.max_date}</span>
             </div>
           )}
 
           {/* Quick Presets */}
           <div>
-            <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1.5">
+            <span className="text-[10px] uppercase tracking-wider font-semibold text-slate-400 dark:text-slate-500 block mb-1.5">
               Quick Relative Presets:
             </span>
             <div className="grid grid-cols-2 gap-1.5">
@@ -273,10 +273,10 @@ export function DatasetGlobalFilterBar() {
                     }
                   }}
                   className={cn(
-                    "py-1 px-2 rounded-md text-xs font-semibold border transition-all text-center",
+                    "py-1 px-2 rounded-md text-xs font-medium border transition-all text-center cursor-pointer",
                     currentPreset === p.id
-                      ? "bg-blue-50 border-blue-300 text-blue-800 shadow-2xs"
-                      : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
+                      ? "bg-blue-50 dark:bg-blue-950/70 border-blue-300 dark:border-blue-700 text-blue-800 dark:text-blue-300 shadow-2xs font-semibold"
+                      : "bg-white dark:bg-slate-900/80 border-slate-200 dark:border-slate-700/80 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
                   )}
                 >
                   {p.label}
@@ -287,12 +287,12 @@ export function DatasetGlobalFilterBar() {
 
           {/* Custom Date Range */}
           <div>
-            <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1.5">
+            <span className="text-[10px] uppercase tracking-wider font-semibold text-slate-400 dark:text-slate-500 block mb-1.5">
               Custom Range:
             </span>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="text-[10px] text-slate-500 block mb-1">Start Date</label>
+                <label className="text-[10px] text-slate-500 dark:text-slate-400 block mb-1 font-medium">Start Date</label>
                 <input
                   type="date"
                   min={filter.min_date || undefined}
@@ -305,11 +305,11 @@ export function DatasetGlobalFilterBar() {
                       start: e.target.value || undefined,
                     });
                   }}
-                  className="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded text-xs"
+                  className="w-full px-2 py-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md text-xs text-slate-900 dark:text-slate-100 focus:outline-hidden focus:border-blue-500 dark:focus:border-blue-400"
                 />
               </div>
               <div>
-                <label className="text-[10px] text-slate-500 block mb-1">End Date</label>
+                <label className="text-[10px] text-slate-500 dark:text-slate-400 block mb-1 font-medium">End Date</label>
                 <input
                   type="date"
                   min={filter.min_date || undefined}
@@ -322,7 +322,7 @@ export function DatasetGlobalFilterBar() {
                       end: e.target.value || undefined,
                     });
                   }}
-                  className="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded text-xs"
+                  className="w-full px-2 py-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md text-xs text-slate-900 dark:text-slate-100 focus:outline-hidden focus:border-blue-500 dark:focus:border-blue-400"
                 />
               </div>
             </div>
@@ -331,7 +331,7 @@ export function DatasetGlobalFilterBar() {
           <button
             type="button"
             onClick={() => removeFilter(filter.column)}
-            className="w-full py-1 text-center text-xs text-slate-500 hover:text-slate-800 transition-colors"
+            className="w-full py-1 text-center text-xs text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors cursor-pointer"
           >
             Reset Date Filter
           </button>
@@ -343,16 +343,16 @@ export function DatasetGlobalFilterBar() {
       const activeNum = activeFilters[filter.column] || {};
       return (
         <div className="space-y-3">
-          <div className="text-[11px] font-semibold text-slate-500 flex items-center justify-between">
+          <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400 flex items-center justify-between">
             <span>Observed Range:</span>
-            <span className="font-mono text-slate-700">
+            <span className="font-mono text-slate-700 dark:text-slate-300">
               {filter.min_value != null ? formatNumber(filter.min_value) : '0'} to{' '}
               {filter.max_value != null ? formatNumber(filter.max_value) : '0'}
             </span>
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-[10px] text-slate-500 block mb-1">Min Value</label>
+              <label className="text-[10px] text-slate-500 dark:text-slate-400 block mb-1 font-medium">Min Value</label>
               <input
                 type="number"
                 placeholder={String(filter.min_value ?? '')}
@@ -363,11 +363,11 @@ export function DatasetGlobalFilterBar() {
                     min: e.target.value !== '' ? Number(e.target.value) : undefined,
                   });
                 }}
-                className="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded text-xs"
+                className="w-full px-2 py-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md text-xs text-slate-900 dark:text-slate-100 focus:outline-hidden focus:border-blue-500 dark:focus:border-blue-400"
               />
             </div>
             <div>
-              <label className="text-[10px] text-slate-500 block mb-1">Max Value</label>
+              <label className="text-[10px] text-slate-500 dark:text-slate-400 block mb-1 font-medium">Max Value</label>
               <input
                 type="number"
                 placeholder={String(filter.max_value ?? '')}
@@ -378,14 +378,14 @@ export function DatasetGlobalFilterBar() {
                     max: e.target.value !== '' ? Number(e.target.value) : undefined,
                   });
                 }}
-                className="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded text-xs"
+                className="w-full px-2 py-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md text-xs text-slate-900 dark:text-slate-100 focus:outline-hidden focus:border-blue-500 dark:focus:border-blue-400"
               />
             </div>
           </div>
           <button
             type="button"
             onClick={() => removeFilter(filter.column)}
-            className="w-full py-1 text-center text-xs text-slate-500 hover:text-slate-800 transition-colors"
+            className="w-full py-1 text-center text-xs text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors cursor-pointer"
           >
             Reset Range
           </button>
@@ -434,7 +434,7 @@ export function DatasetGlobalFilterBar() {
   return (
     <div
       ref={dropdownRef}
-      className="bg-white rounded-xl border border-slate-200/90 shadow-xs p-3.5 mb-5 space-y-3 relative transition-all"
+      className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-800 shadow-xs p-3.5 mb-5 space-y-3 relative transition-all"
     >
       {/* Main Filter Bar */}
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -449,17 +449,17 @@ export function DatasetGlobalFilterBar() {
               value={globalSearchInput}
               onChange={(e) => handleGlobalSearchChange(e.target.value)}
               className={cn(
-                "w-full pl-8 pr-7 py-1.5 bg-slate-50 border rounded-lg text-xs text-slate-900 focus:outline-hidden focus:bg-white transition-all",
+                "w-full pl-8 pr-7 py-1.5 bg-slate-50 dark:bg-slate-800/80 border rounded-lg text-xs text-slate-900 dark:text-slate-100 focus:outline-hidden focus:bg-white dark:focus:bg-slate-800 transition-all",
                 activeFilters['_search']
-                  ? "border-blue-400 bg-blue-50/30 text-blue-900 font-medium"
-                  : "border-slate-200 focus:border-blue-500"
+                  ? "border-blue-400 dark:border-blue-600 bg-blue-50/30 dark:bg-blue-950/40 text-blue-900 dark:text-blue-200 font-medium"
+                  : "border-slate-200 dark:border-slate-700 focus:border-blue-500 dark:focus:border-blue-400"
               )}
             />
             {globalSearchInput && (
               <button
                 type="button"
                 onClick={handleClearGlobalSearch}
-                className="absolute right-2 top-2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                className="absolute right-2 top-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
                 title="Clear search"
               >
                 <X className="w-3.5 h-3.5" />
@@ -467,7 +467,7 @@ export function DatasetGlobalFilterBar() {
             )}
           </div>
 
-          <div className="h-5 w-px bg-slate-200 mx-0.5 hidden sm:block" />
+          <div className="h-5 w-px bg-slate-200 dark:bg-slate-800 mx-0.5 hidden sm:block" />
 
           {/* Primary Filters (Horizontal Dropdown Pills) */}
           {primaryFilters.map((filter) => {
@@ -482,8 +482,8 @@ export function DatasetGlobalFilterBar() {
                   className={cn(
                     'px-3 py-1.5 rounded-lg text-xs font-semibold border flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer',
                     hasActive
-                      ? 'bg-blue-50 border-blue-300 text-blue-800'
-                      : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50'
+                      ? 'bg-blue-50 dark:bg-blue-950/70 border-blue-300 dark:border-blue-800 text-blue-800 dark:text-blue-300'
+                      : 'bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/60'
                   )}
                 >
                   {filter.type === 'datetime' ? (
@@ -508,13 +508,13 @@ export function DatasetGlobalFilterBar() {
 
                 {/* Dropdown Popover */}
                 {isOpen && (
-                  <div className="absolute top-full left-0 mt-1.5 z-50 w-72 bg-white rounded-xl border border-slate-200 shadow-xl p-3.5 text-xs animate-in fade-in zoom-in-95 duration-100">
-                    <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
-                      <span className="font-bold text-slate-900 text-xs">{filter.label}</span>
+                  <div className="absolute top-full left-0 mt-1.5 z-50 w-72 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xl p-3.5 text-xs animate-in fade-in zoom-in-95 duration-100">
+                    <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100 dark:border-slate-700">
+                      <span className="font-bold text-slate-900 dark:text-slate-100 text-xs">{filter.label}</span>
                       <button
                         type="button"
                         onClick={() => setOpenDropdown(null)}
-                        className="text-slate-400 hover:text-slate-600"
+                        className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>
@@ -534,13 +534,13 @@ export function DatasetGlobalFilterBar() {
               className={cn(
                 'px-3 py-1.5 rounded-lg text-xs font-semibold border flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer',
                 secondaryFilters.some((f) => Boolean(activeFilters[f.column]))
-                  ? 'bg-blue-50 border-blue-300 text-blue-800'
-                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                  ? 'bg-blue-50 dark:bg-blue-950/70 border-blue-300 dark:border-blue-800 text-blue-800 dark:text-blue-300'
+                  : 'bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/60'
               )}
             >
               <SlidersHorizontal className="w-3.5 h-3.5" />
               <span>More Filters</span>
-              <span className="text-[10px] px-1.5 rounded bg-slate-100 text-slate-600 font-bold">
+              <span className="text-[10px] px-1.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold">
                 +{secondaryFilters.length}
               </span>
             </button>
@@ -557,19 +557,19 @@ export function DatasetGlobalFilterBar() {
           ) : (
             <div className="text-xs">
               {isFiltered ? (
-                <span className="text-slate-700">
+                <span className="text-slate-700 dark:text-slate-300">
                   Showing{' '}
-                  <strong className="text-blue-700 font-mono">
+                  <strong className="text-blue-700 dark:text-blue-400 font-mono">
                     {formatNumber(filteredRows)}
                   </strong>{' '}
                   / {formatNumber(totalRows)} records{' '}
-                  <span className="text-slate-400 font-normal">
+                  <span className="text-slate-400 dark:text-slate-500 font-normal">
                     ({percentageOfTotal.toFixed(1)}%)
                   </span>
                 </span>
               ) : (
-                <span className="text-slate-500 font-medium">
-                  All <strong className="text-slate-800 font-mono">{formatNumber(totalRows)}</strong> records
+                <span className="text-slate-500 dark:text-slate-400 font-medium">
+                  All <strong className="text-slate-800 dark:text-slate-200 font-mono">{formatNumber(totalRows)}</strong> records
                 </span>
               )}
             </div>
@@ -580,7 +580,7 @@ export function DatasetGlobalFilterBar() {
               type="button"
               onClick={clearAllFilters}
               disabled={isFiltering}
-              className="px-2.5 py-1 text-xs font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-md border border-rose-200 transition-colors flex items-center gap-1 cursor-pointer"
+              className="px-2.5 py-1 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-md border border-rose-200 dark:border-rose-900 transition-colors flex items-center gap-1 cursor-pointer"
             >
               <RotateCcw className="w-3 h-3" />
               <span>Clear All</span>
@@ -591,8 +591,8 @@ export function DatasetGlobalFilterBar() {
 
       {/* Active Filter Chips Row */}
       {isFiltered && (
-        <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-100">
-          <span className="text-[11px] font-semibold text-slate-400 mr-1">Active:</span>
+        <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-100 dark:border-slate-800">
+          <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 mr-1">Active:</span>
           {Object.keys(activeFilters).map((col) => {
             const val = activeFilters[col];
             if (val === null || val === undefined || (Array.isArray(val) && val.length === 0)) return null;
@@ -604,14 +604,14 @@ export function DatasetGlobalFilterBar() {
             return (
               <span
                 key={col}
-                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-medium shadow-2xs"
+                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-xs font-medium shadow-2xs"
               >
-                <span className="font-semibold text-slate-800">{label}:</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200">{label}:</span>
                 <span className="truncate max-w-[150px] font-mono text-[11px]">{displayVal}</span>
                 <button
                   type="button"
                   onClick={() => removeFilter(col)}
-                  className="hover:text-blue-900 ml-0.5 cursor-pointer"
+                  className="hover:text-blue-900 dark:hover:text-blue-100 ml-0.5 cursor-pointer"
                   aria-label={`Remove filter for ${label}`}
                 >
                   <X className="w-3 h-3" />
@@ -627,48 +627,48 @@ export function DatasetGlobalFilterBar() {
         <div className="fixed inset-0 z-50 overflow-hidden flex justify-end">
           {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-slate-900/30 backdrop-blur-xs transition-opacity"
+            className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs transition-opacity"
             onClick={() => setShowDrawer(false)}
           />
 
           {/* Drawer Content */}
-          <div className="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col z-10 animate-in slide-in-from-right duration-200">
+          <div className="relative w-full max-w-md bg-white dark:bg-slate-900 h-full shadow-2xl border-l border-slate-200 dark:border-slate-800 flex flex-col z-10 animate-in slide-in-from-right duration-200">
             {/* Drawer Header */}
-            <div className="p-4 sm:p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+            <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/80 dark:bg-slate-900">
               <div className="flex items-center gap-2">
-                <SlidersHorizontal className="w-4 h-4 text-blue-600" />
-                <h3 className="text-base font-bold text-slate-900">Dataset Filters</h3>
-                <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-blue-100 text-blue-800">
+                <SlidersHorizontal className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Dataset Filters</h3>
+                <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-50 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800">
                   {secondaryFilters.length} available
                 </span>
               </div>
               <button
                 type="button"
                 onClick={() => setShowDrawer(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200/60"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer transition-colors"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Drawer Search */}
-            <div className="p-3 border-b border-slate-100">
+            <div className="p-3 border-b border-slate-100 dark:border-slate-800">
               <div className="relative">
-                <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-slate-400" />
+                <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-slate-400 dark:text-slate-500" />
                 <input
                   type="text"
                   placeholder="Find a filter attribute..."
                   value={drawerSearch}
                   onChange={(e) => setDrawerSearch(e.target.value)}
-                  className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-hidden focus:border-blue-500"
+                  className="w-full pl-8 pr-3 py-1.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-hidden focus:border-blue-500 dark:focus:border-blue-400 transition-colors"
                 />
               </div>
             </div>
 
             {/* Drawer Filter List */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 divide-y divide-slate-100">
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 divide-y divide-slate-100 dark:divide-slate-800/60">
               {filteredSecondaryFilters.length === 0 ? (
-                <div className="py-8 text-center text-xs text-slate-400">
+                <div className="py-8 text-center text-xs text-slate-400 dark:text-slate-500">
                   No filters found matching "{drawerSearch}"
                 </div>
               ) : (
@@ -684,28 +684,28 @@ export function DatasetGlobalFilterBar() {
                           setActiveDrawerFilter(isExpanded ? null : sFilter.column)
                         }
                         className={cn(
-                          "w-full text-left p-2.5 rounded-lg flex items-center justify-between transition-colors",
+                          "w-full text-left p-2.5 rounded-lg flex items-center justify-between transition-colors cursor-pointer",
                           isExpanded
-                            ? "bg-slate-100"
+                            ? "bg-slate-100 dark:bg-slate-800"
                             : hasActive
-                            ? "bg-blue-50 border border-blue-200"
-                            : "hover:bg-slate-50"
+                            ? "bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800"
+                            : "hover:bg-slate-50 dark:hover:bg-slate-800/50"
                         )}
                       >
                         <div className="flex items-center gap-2">
                           {sFilter.type === 'datetime' ? (
-                            <Calendar className="w-4 h-4 text-slate-400" />
+                            <Calendar className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                           ) : sFilter.type === 'numeric' ? (
-                            <Hash className="w-4 h-4 text-slate-400" />
+                            <Hash className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                           ) : sFilter.type === 'boolean' ? (
-                            <ToggleLeft className="w-4 h-4 text-slate-400" />
+                            <ToggleLeft className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                           ) : (
-                            <Layers className="w-4 h-4 text-slate-400" />
+                            <Layers className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                           )}
-                          <span className="text-xs font-bold text-slate-800">
+                          <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
                             {sFilter.label}
                           </span>
-                          <span className="text-[10px] text-slate-400 font-mono">
+                          <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">
                             ({sFilter.column})
                           </span>
                         </div>
@@ -718,7 +718,7 @@ export function DatasetGlobalFilterBar() {
                           )}
                           <ChevronRight
                             className={cn(
-                              "w-4 h-4 text-slate-400 transition-transform",
+                              "w-3.5 h-3.5 text-slate-400 transition-transform",
                               isExpanded && "rotate-90"
                             )}
                           />
@@ -727,7 +727,7 @@ export function DatasetGlobalFilterBar() {
 
                       {/* Expanded Filter Body */}
                       {isExpanded && (
-                        <div className="p-3 bg-slate-50/70 border border-slate-200 rounded-b-lg mt-1 text-xs">
+                        <div className="p-3 bg-slate-50/70 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 rounded-b-lg mt-1 text-xs">
                           {renderFilterEditor(sFilter, true)}
                         </div>
                       )}
@@ -738,22 +738,22 @@ export function DatasetGlobalFilterBar() {
             </div>
 
             {/* Drawer Footer */}
-            <div className="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
+            <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900 flex items-center justify-between">
               {isFiltered ? (
                 <button
                   type="button"
                   onClick={clearAllFilters}
-                  className="px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-lg border border-rose-200"
+                  className="px-3 py-1.5 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg border border-rose-200 dark:border-rose-900 cursor-pointer transition-colors"
                 >
                   Clear All Filters
                 </button>
               ) : (
-                <span className="text-xs text-slate-400">All data records active</span>
+                <span className="text-xs text-slate-400 dark:text-slate-500">All data records active</span>
               )}
               <button
                 type="button"
                 onClick={() => setShowDrawer(false)}
-                className="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs"
+                className="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 text-white text-xs font-medium shadow-xs cursor-pointer transition-colors"
               >
                 Done
               </button>

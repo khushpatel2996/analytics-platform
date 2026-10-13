@@ -21,43 +21,45 @@ export function KPICard({
   badge,
   badgeColor,
   icon: Icon,
-  iconBgColor = 'bg-blue-50',
-  iconColor = 'text-blue-600',
+  iconBgColor,
+  iconColor,
   className,
 }: KPICardProps) {
   return (
     <div
       className={cn(
-        'bg-white rounded-xl border border-slate-200/80 p-5 shadow-xs flex flex-col justify-between min-h-[145px] transition-all hover:border-slate-300 hover:shadow-xs',
+        'bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 p-4 sm:p-4.5 shadow-2xs flex flex-col justify-between transition-all hover:border-slate-300 dark:hover:border-slate-700 min-h-[110px]',
         className
       )}
     >
       <div className="flex items-center justify-between gap-2">
-        <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500 truncate">
+        <span className="text-[11px] font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate">
           {label}
         </span>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 shrink-0">
           {badge && (
             <span
               className={cn(
-                'px-1.5 py-0.5 rounded text-[10px] font-bold font-mono',
-                badgeColor || 'bg-blue-50 text-blue-700 border border-blue-200'
+                'px-1.5 py-0.5 rounded text-[10px] font-medium font-mono',
+                badgeColor || 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
               )}
             >
               {badge}
             </span>
           )}
-          <div className={cn('w-9 h-9 rounded-xl flex items-center justify-center shrink-0', iconBgColor, iconColor)}>
-            <Icon className="w-4.5 h-4.5" />
-          </div>
+          {Icon && (
+            <div className="w-6 h-6 rounded-md flex items-center justify-center text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800/80 shrink-0">
+              <Icon className="w-3.5 h-3.5" />
+            </div>
+          )}
         </div>
       </div>
-      <div>
-        <div className="text-2xl sm:text-[28px] font-bold text-slate-900 tracking-tight leading-none my-1">
+      <div className="mt-2">
+        <div className="text-xl sm:text-2xl font-semibold text-slate-900 dark:text-slate-100 tracking-tight leading-none">
           {value}
         </div>
         {subtitle && (
-          <p className="text-xs text-slate-500 mt-1.5 font-normal truncate">
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-normal truncate">
             {subtitle}
           </p>
         )}

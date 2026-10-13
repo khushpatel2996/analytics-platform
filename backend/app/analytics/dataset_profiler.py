@@ -36,11 +36,16 @@ class DatasetProfiler:
         re.IGNORECASE,
     )
 
-    @staticmethod
-    def serialize_value(val: Any) -> Any:
-        """Convert scalar value to JSON-safe Python native types."""
-        if pd.isna(val) or val is None:
+    @classmethod
+    def serialize_value(cls, val: Any) -> Any:
+        """Convert scalar or compound value to JSON-safe Python native types."""
+        if val is None:
             return None
+        if isinstance(val, (dict, list)):
+            try:
+                return json.loads(json.dumps(val, default=str))
+            except Exception:
+                return str(val)
         if isinstance(val, (np.floating, float)):
             if np.isnan(val) or np.isinf(val):
                 return None
@@ -51,7 +56,68 @@ class DatasetProfiler:
             return bool(val)
         if isinstance(val, (pd.Timestamp, datetime, date)):
             return val.isoformat()
+        try:
+            if bool(pd.isna(val)):
+                return None
+        except Exception:
+            pass
         return str(val)
+
+    @classmethod
+    def to_safe_representation(cls, val: Any) -> Any:
+        """
+        Converts unhashable, complex, or nested values (dict, list, set, etc.) into
+        a deterministic, hashable representation for semantic typing, frequency,
+        and uniqueness comparison, without mutating the original DataFrame values.
+        """
+        if val is None:
+            return None
+        if isinstance(val, (dict, list, set, tuple)):
+            try:
+                return json.dumps(val, sort_keys=True, default=str)
+            except Exception:
+                return str(val)
+        if isinstance(val, (int, float, str, bool, np.number, np.bool_)):
+            try:
+                if pd.isna(val):
+                    return None
+            except Exception:
+                pass
+            return val
+        if isinstance(val, (pd.Timestamp, datetime, date)):
+            return val.isoformat()
+        try:
+            if bool(pd.isna(val)):
+                return None
+        except Exception:
+            pass
+        try:
+            hash(val)
+            return val
+        except TypeError:
+            return str(val)
+
+    @classmethod
+    def safe_non_null_series(cls, s: pd.Series) -> pd.Series:
+        """
+        Returns a non-null series where any unhashable values (dict, list, set, etc.)
+        are converted to deterministic safe hashable representations.
+        The original Series s is never mutated.
+        """
+        non_null = s.dropna()
+        if non_null.empty:
+            return non_null
+        sample = non_null.head(50)
+        has_complex = any(isinstance(v, (dict, list, set, tuple)) for v in sample)
+        if not has_complex:
+            try:
+                for v in sample:
+                    hash(v)
+                return non_null
+            except TypeError:
+                pass
+
+        return non_null.map(cls.to_safe_representation).dropna()
 
     @classmethod
     def _is_safe_date_column(cls, non_null: pd.Series) -> bool:
@@ -59,10 +125,15 @@ class DatasetProfiler:
         Safely inspect non-null string samples to check if the column contains dates.
         Strictly prevents arbitrary texts or numeric IDs from being misclassified.
         """
-        sample = non_null.head(50).astype(str)
-        if sample.empty:
+        sample_raw = non_null.head(50)
+        if sample_raw.empty:
             return False
 
+        # If any sample element is a nested object/dict/list/set, it is not a date column
+        if any(isinstance(v, (dict, list, set)) for v in sample_raw):
+            return False
+
+        sample = sample_raw.astype(str)
         valid_date_count = 0
         for val in sample:
             val_clean = val.strip()
@@ -89,8 +160,10 @@ class DatasetProfiler:
         """
         Classifies column into semantic types:
         'numeric', 'categorical', 'datetime', 'boolean', or 'text'.
+        Safely handles strings, numbers, booleans, dates, lists, dictionaries / JSON objects,
+        mixed object columns, and None / NaN without mutating the original DataFrame values.
         """
-        # 1. Boolean check
+        # 1. Native boolean check
         if pd.api.types.is_bool_dtype(s):
             return "boolean"
 
@@ -98,18 +171,24 @@ class DatasetProfiler:
         if non_null.empty:
             return "text"
 
-        if s.dtype == "object":
-            unique_vals = set(non_null.unique())
-            if unique_vals.issubset({True, False}) or unique_vals.issubset({"true", "false", "True", "False"}):
-                return "boolean"
-
-        # 2. Datetime check (native pandas datetime)
+        # 2. Native datetime check
         if pd.api.types.is_datetime64_any_dtype(s):
             return "datetime"
 
-        # 3. Numeric check
+        # 3. Native numeric check
         if pd.api.types.is_numeric_dtype(s):
             return "numeric"
+
+        # Safe non-null representation for unhashable or nested values
+        safe_non_null = cls.safe_non_null_series(non_null)
+        if safe_non_null.empty:
+            return "text"
+
+        # Safe boolean check (covers native bools or boolean string values in object / string series)
+        if s.dtype == "object" or pd.api.types.is_string_dtype(s):
+            unique_vals = set(safe_non_null)
+            if unique_vals.issubset({True, False}) or unique_vals.issubset({"true", "false", "True", "False"}):
+                return "boolean"
 
         # 4. Safe detection of date-like string columns
         if s.dtype == "object" or pd.api.types.is_string_dtype(s):
@@ -120,9 +199,9 @@ class DatasetProfiler:
         if isinstance(s.dtype, pd.CategoricalDtype):
             return "categorical"
 
-        total_count = len(non_null)
-        unique_count = non_null.nunique()
-        str_series = non_null.astype(str).str.strip()
+        total_count = len(safe_non_null)
+        unique_count = safe_non_null.nunique()
+        str_series = safe_non_null.astype(str).str.strip()
         avg_len = str_series.str.len().mean() if not str_series.empty else 0
         avg_words = str_series.str.split().str.len().mean() if not str_series.empty else 0
         unique_ratio = unique_count / total_count if total_count > 0 else 0.0
@@ -289,7 +368,8 @@ class DatasetProfiler:
             try:
                 unique_count = int(s.nunique(dropna=True))
             except TypeError:
-                unique_count = int(s.astype(str).nunique(dropna=True))
+                safe_s = cls.safe_non_null_series(s)
+                unique_count = int(safe_s.nunique(dropna=True))
 
             is_empty = (null_count == total_rows)
             if is_empty:
@@ -345,7 +425,8 @@ class DatasetProfiler:
                 try:
                     vc = s.dropna().value_counts().head(10)
                 except TypeError:
-                    vc = s.dropna().astype(str).value_counts().head(10)
+                    safe_s = cls.safe_non_null_series(s)
+                    vc = safe_s.value_counts().head(10)
                 top_values = [
                     ValueFrequency(
                         value=cls.serialize_value(val),

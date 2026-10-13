@@ -32,18 +32,18 @@ export function ChartCard({
   return (
     <div
       className={cn(
-        'bg-white rounded-xl border border-slate-200/80 p-5 shadow-xs flex flex-col justify-between transition-all hover:border-slate-300/80',
+        'bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-xs flex flex-col justify-between transition-all hover:border-slate-300/80 dark:hover:border-slate-700',
         className
       )}
     >
       {/* Card Header */}
       <div className="flex flex-wrap items-start justify-between gap-2 mb-3">
         <div className="min-w-0">
-          <h3 className="text-sm sm:text-[15px] font-bold text-slate-900 tracking-tight leading-snug truncate">
+          <h3 className="text-sm sm:text-[15px] font-bold text-slate-900 dark:text-slate-100 tracking-tight leading-snug truncate">
             {title}
           </h3>
           {subtitle && (
-            <p className="text-xs text-slate-500 mt-0.5 truncate font-normal">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate font-normal">
               {subtitle}
             </p>
           )}

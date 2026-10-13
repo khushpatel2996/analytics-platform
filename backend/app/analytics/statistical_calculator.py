@@ -41,6 +41,7 @@ from backend.app.schemas.intelligence import (
     TrendsAnalytics,
 )
 from backend.app.schemas.upload import DatasetProfileResponse
+from backend.app.analytics.dataset_profiler import DatasetProfiler
 
 
 class StatisticalCalculator:
@@ -434,7 +435,11 @@ class StatisticalCalculator:
             if non_null.empty:
                 continue
 
-            grouped = non_null.groupby(col_name)[metric_col].sum().sort_values(ascending=False).head(10)
+            try:
+                grouped = non_null.groupby(col_name)[metric_col].sum().sort_values(ascending=False).head(10)
+            except TypeError:
+                safe_col = non_null[col_name].map(DatasetProfiler.to_safe_representation)
+                grouped = non_null.assign(_safe_col=safe_col).groupby('_safe_col')[metric_col].sum().sort_values(ascending=False).head(10)
             items: List[RankingItem] = []
             for rank, (name, val) in enumerate(grouped.items(), start=1):
                 val_float = cls.safe_float(val) or 0.0
@@ -764,7 +769,11 @@ class StatisticalCalculator:
             s = df[col_name]
             missing_c = int(s.isna().sum())
             missing_p = cls.safe_float((missing_c / total_rows) * 100) if total_rows > 0 else 0.0
-            unique_c = int(s.nunique())
+            try:
+                unique_c = int(s.nunique())
+            except TypeError:
+                safe_s = DatasetProfiler.safe_non_null_series(s)
+                unique_c = int(safe_s.nunique())
             unique_p = cls.safe_float((unique_c / total_rows) * 100) if total_rows > 0 else 0.0
 
             col_items.append(
@@ -1124,7 +1133,10 @@ class StatisticalCalculator:
                 priority = 4
             # 5. Other discrete categorical dimensions
             elif dc.type == "categorical":
-                u_cnt = non_null.nunique()
+                try:
+                    u_cnt = non_null.nunique()
+                except TypeError:
+                    u_cnt = DatasetProfiler.safe_non_null_series(non_null).nunique()
                 if 2 <= u_cnt <= 80:
                     priority = 5
             # 6. Useful numeric metrics
@@ -1140,7 +1152,10 @@ class StatisticalCalculator:
                     priority = 8
             # 9. Low-cardinality text
             elif dc.type == "text":
-                u_cnt = non_null.nunique()
+                try:
+                    u_cnt = non_null.nunique()
+                except TypeError:
+                    u_cnt = DatasetProfiler.safe_non_null_series(non_null).nunique()
                 if 2 <= u_cnt <= 30:
                     priority = 9
 
@@ -1173,7 +1188,7 @@ class StatisticalCalculator:
                             max_date=max_d,
                         )
                     )
-            elif dc.type == "boolean" or (non_null.nunique() == 2 and dc.type in ["categorical", "boolean"]):
+            elif dc.type == "boolean":
                 vc = s.dropna().astype(str).str.strip().value_counts()
                 options = [
                     FilterOptionItem(value=str(val), count=int(cnt))

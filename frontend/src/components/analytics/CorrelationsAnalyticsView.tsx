@@ -98,12 +98,12 @@ export function CorrelationsAnalyticsView({
           moduleTitle={moduleTitle}
           text={whyThisMatters || 'Correlation analysis maps pairwise numerical co-movement. Correlation does not imply causation.'}
         />
-        <div className="bg-white rounded-xl border border-slate-200/80 p-10 text-center max-w-lg mx-auto my-8 shadow-xs">
-          <Network className="w-10 h-10 text-slate-400 mx-auto mb-3" />
-          <h3 className="text-base font-bold text-slate-900 tracking-tight">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 p-10 text-center max-w-lg mx-auto my-8 shadow-xs">
+          <Network className="w-10 h-10 text-slate-400 dark:text-slate-500 mx-auto mb-3" />
+          <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100 tracking-tight">
             Insufficient Numeric Columns for Correlation
           </h3>
-          <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto leading-relaxed">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto leading-relaxed">
             Multivariate correlation analysis requires at least two continuous numerical columns with non-zero variance.
           </p>
         </div>
@@ -114,13 +114,13 @@ export function CorrelationsAnalyticsView({
   const { columns, matrix, strongest_positive, strongest_negative } = correlations;
 
   const getCellBadge = (val: number | null | undefined, isDiagonal: boolean) => {
-    if (isDiagonal) return 'bg-slate-100 text-slate-400 font-bold';
-    if (val === null || val === undefined || isNaN(val)) return 'bg-slate-50 text-slate-300';
-    if (val >= 0.7) return 'bg-emerald-100 text-emerald-800 font-bold';
-    if (val >= 0.3) return 'bg-emerald-50 text-emerald-700 font-semibold';
-    if (val <= -0.7) return 'bg-rose-100 text-rose-800 font-bold';
-    if (val <= -0.3) return 'bg-rose-50 text-rose-700 font-semibold';
-    return 'bg-slate-50 text-slate-600';
+    if (isDiagonal) return 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 font-bold';
+    if (val === null || val === undefined || isNaN(val)) return 'bg-slate-50 dark:bg-slate-900 text-slate-300 dark:text-slate-600';
+    if (val >= 0.7) return 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold';
+    if (val >= 0.3) return 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 font-semibold';
+    if (val <= -0.7) return 'bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300 font-bold';
+    if (val <= -0.3) return 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 font-semibold';
+    return 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400';
   };
 
   return (
@@ -132,72 +132,72 @@ export function CorrelationsAnalyticsView({
       />
 
       {/* Header Banner */}
-      <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+          <h2 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-slate-100 tracking-tight">
             {moduleTitle}
           </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             Pearson linear correlation coefficient (r) calculated across {columns.length} numeric attributes.
           </p>
         </div>
 
         {/* Prominent Causation Disclaimer Badge */}
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold shrink-0">
-          <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-amber-800 dark:text-amber-300 text-xs font-semibold shrink-0">
+          <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
           <span>Correlation ≠ Causation</span>
         </div>
       </div>
 
       {/* 2 Callout Cards: Strongest Positive & Strongest Negative */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-xs flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-xs flex items-center justify-between">
           <div>
-            <div className="flex items-center gap-1.5 text-emerald-700 text-[11px] font-semibold uppercase tracking-wider mb-1">
+            <div className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400 text-[11px] font-semibold uppercase tracking-wider mb-1">
               <ArrowUpRight className="w-4 h-4" />
               <span>Strongest Positive Relationship</span>
             </div>
             {strongest_positive ? (
               <div>
-                <div className="text-base font-bold text-slate-900">
+                <div className="text-base font-semibold text-slate-900 dark:text-slate-100">
                   {strongest_positive.col1} & {strongest_positive.col2}
                 </div>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                   Direct proportional co-movement
                 </p>
               </div>
             ) : (
-              <p className="text-xs text-slate-400">No significant positive pair found</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500">No significant positive pair found</p>
             )}
           </div>
           {strongest_positive && (
-            <div className="px-3.5 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 font-mono font-bold text-lg">
+            <div className="px-3.5 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-300 font-mono font-bold text-lg">
               +{strongest_positive.correlation.toFixed(2)}
             </div>
           )}
         </div>
 
-        <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-xs flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-xs flex items-center justify-between">
           <div>
-            <div className="flex items-center gap-1.5 text-rose-700 text-[11px] font-semibold uppercase tracking-wider mb-1">
+            <div className="flex items-center gap-1.5 text-rose-700 dark:text-rose-400 text-[11px] font-semibold uppercase tracking-wider mb-1">
               <ArrowDownRight className="w-4 h-4" />
               <span>Strongest Inverse Relationship</span>
             </div>
             {strongest_negative ? (
               <div>
-                <div className="text-base font-bold text-slate-900">
+                <div className="text-base font-semibold text-slate-900 dark:text-slate-100">
                   {strongest_negative.col1} & {strongest_negative.col2}
                 </div>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                   Opposite directional relationship
                 </p>
               </div>
             ) : (
-              <p className="text-xs text-slate-400">No significant inverse pair found</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500">No significant inverse pair found</p>
             )}
           </div>
           {strongest_negative && (
-            <div className="px-3.5 py-2 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 font-mono font-bold text-lg">
+            <div className="px-3.5 py-2 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 text-rose-700 dark:text-rose-300 font-mono font-bold text-lg">
               {strongest_negative.correlation.toFixed(2)}
             </div>
           )}
@@ -205,21 +205,21 @@ export function CorrelationsAnalyticsView({
       </div>
 
       {/* Strongest Relationships First (Ranked List) */}
-      <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-xs space-y-4">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-3.5 border-b border-slate-100 gap-3">
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-3.5 border-b border-slate-100 dark:border-slate-800 gap-3">
           <div>
-            <h3 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight">
+            <h3 className="text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100 tracking-tight">
               Ranked Feature Relationships
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               Strongest statistical connections sorted by absolute magnitude of correlation.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
             {/* Direction Filter */}
-            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1.5">
+            <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-lg">
+              <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider px-1.5">
                 Direction:
               </span>
               {[
@@ -232,10 +232,10 @@ export function CorrelationsAnalyticsView({
                   type="button"
                   onClick={() => setDirectionFilter(btn.val as any)}
                   className={cn(
-                    'px-2.5 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer',
+                    'px-2.5 py-1 rounded-md text-xs font-medium transition-all cursor-pointer',
                     directionFilter === btn.val
-                      ? 'bg-white text-slate-900 shadow-2xs font-bold'
-                      : 'text-slate-600 hover:text-slate-900'
+                      ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-2xs font-semibold'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                   )}
                 >
                   {btn.label}
@@ -244,8 +244,8 @@ export function CorrelationsAnalyticsView({
             </div>
 
             {/* Min |r| Threshold Filter */}
-            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1.5">
+            <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-lg">
+              <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider px-1.5">
                 Min |r|:
               </span>
               {[
@@ -259,10 +259,10 @@ export function CorrelationsAnalyticsView({
                   type="button"
                   onClick={() => setMinThreshold(btn.val)}
                   className={cn(
-                    'px-2.5 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer',
+                    'px-2.5 py-1 rounded-md text-xs font-medium transition-all cursor-pointer',
                     minThreshold === btn.val
-                      ? 'bg-white text-slate-900 shadow-2xs font-bold'
-                      : 'text-slate-600 hover:text-slate-900'
+                      ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-2xs font-semibold'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                   )}
                 >
                   {btn.label}
@@ -273,10 +273,10 @@ export function CorrelationsAnalyticsView({
         </div>
 
         {/* Ranked Pairs Table */}
-        <div className="overflow-x-auto rounded-lg border border-slate-100">
+        <div className="overflow-x-auto rounded-lg border border-slate-100 dark:border-slate-800">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-200/80 text-slate-600 font-semibold uppercase tracking-wider text-[11px]">
+              <tr className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200/80 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-medium uppercase tracking-wider text-[11px]">
                 <th className="py-2.5 px-4 w-12 text-center">#</th>
                 <th className="py-2.5 px-4">Feature Pair</th>
                 <th className="py-2.5 px-4 text-center">Relationship Type</th>
@@ -284,35 +284,35 @@ export function CorrelationsAnalyticsView({
                 <th className="py-2.5 px-4 text-right">Strength</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {filteredPairs.slice(0, 12).map((pair, idx) => {
                 const isPos = pair.r > 0;
                 return (
-                  <tr key={`${pair.col1}-${pair.col2}`} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-2.5 px-4 text-center font-mono text-slate-400">{idx + 1}</td>
-                    <td className="py-2.5 px-4 font-semibold text-slate-800">
+                  <tr key={`${pair.col1}-${pair.col2}`} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors">
+                    <td className="py-2.5 px-4 text-center font-mono text-slate-400 dark:text-slate-500">{idx + 1}</td>
+                    <td className="py-2.5 px-4 font-medium text-slate-800 dark:text-slate-200">
                       <span>{pair.col1}</span>
-                      <span className="text-slate-400 mx-2">↔</span>
+                      <span className="text-slate-400 dark:text-slate-500 mx-2">↔</span>
                       <span>{pair.col2}</span>
                     </td>
                     <td className="py-2.5 px-4 text-center">
                       <span
                         className={cn(
-                          'px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider',
+                          'px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider',
                           pair.type === 'positive'
-                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                            ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60'
                             : pair.type === 'negative'
-                            ? 'bg-rose-50 text-rose-700 border border-rose-200'
-                            : 'bg-slate-100 text-slate-600'
+                            ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/60'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
                         )}
                       >
                         {pair.relationship}
                       </span>
                     </td>
-                    <td className="py-2.5 px-4 text-right font-mono font-bold">
+                    <td className="py-2.5 px-4 text-right font-mono font-semibold">
                       <span
                         className={cn(
-                          isPos ? 'text-emerald-700' : pair.r < 0 ? 'text-rose-700' : 'text-slate-600'
+                          isPos ? 'text-emerald-700 dark:text-emerald-400' : pair.r < 0 ? 'text-rose-700 dark:text-rose-400' : 'text-slate-600 dark:text-slate-400'
                         )}
                       >
                         {isPos ? `+${pair.r.toFixed(2)}` : pair.r.toFixed(2)}
@@ -320,13 +320,13 @@ export function CorrelationsAnalyticsView({
                     </td>
                     <td className="py-2.5 px-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                        <div className="w-16 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                           <div
                             className={cn('h-full rounded-full', isPos ? 'bg-emerald-500' : 'bg-rose-500')}
                             style={{ width: `${Math.min(pair.abs_r * 100, 100)}%` }}
                           />
                         </div>
-                        <span className="font-mono text-slate-500 text-[11px]">
+                        <span className="font-mono text-slate-500 dark:text-slate-400 text-[11px]">
                           {(pair.abs_r * 100).toFixed(0)}%
                         </span>
                       </div>
@@ -340,24 +340,24 @@ export function CorrelationsAnalyticsView({
       </div>
 
       {/* Expandable Full Pearson Heatmap Matrix */}
-      <div className="bg-white rounded-xl border border-slate-200/80 shadow-xs overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-xs overflow-hidden">
         <button
           type="button"
           onClick={() => setShowFullMatrix(!showFullMatrix)}
-          className="w-full p-4 flex items-center justify-between text-left hover:bg-slate-50/70 transition-colors"
+          className="w-full p-4 flex items-center justify-between text-left hover:bg-slate-50/70 dark:hover:bg-slate-800/50 transition-colors"
         >
           <div className="flex items-center gap-2.5">
-            <Sliders className="w-4 h-4 text-blue-600" />
+            <Sliders className="w-4 h-4 text-blue-600 dark:text-blue-400" />
             <div>
-              <h4 className="text-xs sm:text-sm font-bold text-slate-900">
+              <h4 className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100">
                 Full Correlation Matrix Heatmap
               </h4>
-              <p className="text-[11px] text-slate-500 mt-0.5">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                 Complete {columns.length} × {columns.length} pairwise correlation matrix.
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-1 text-xs font-semibold text-slate-600">
+          <div className="flex items-center gap-1 text-xs font-medium text-slate-600 dark:text-slate-400">
             <span>{showFullMatrix ? 'Collapse Matrix' : 'Expand Matrix'}</span>
             {showFullMatrix ? (
               <ChevronUp className="w-4 h-4" />
@@ -368,12 +368,12 @@ export function CorrelationsAnalyticsView({
         </button>
 
         {showFullMatrix && (
-          <div className="p-5 border-t border-slate-100 bg-slate-50/30">
-            <div className="overflow-x-auto rounded-lg border border-slate-200">
+          <div className="p-5 border-t border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-950/30">
+            <div className="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-800">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase tracking-wider text-[10px]">
-                    <th className="py-2.5 px-4 font-bold text-slate-700">Feature</th>
+                  <tr className="bg-slate-50 dark:bg-slate-800/70 border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-medium uppercase tracking-wider text-[10px]">
+                    <th className="py-2.5 px-4 font-semibold text-slate-700 dark:text-slate-300">Feature</th>
                     {columns.map((col) => (
                       <th key={col} className="py-2.5 px-3 text-center whitespace-nowrap">
                         {col}
@@ -381,10 +381,10 @@ export function CorrelationsAnalyticsView({
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                   {columns.map((rCol) => (
-                    <tr key={rCol} className="hover:bg-slate-50/60 transition-colors">
-                      <td className="py-2.5 px-4 font-semibold text-slate-900 whitespace-nowrap bg-slate-50/50">
+                    <tr key={rCol} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors">
+                      <td className="py-2.5 px-4 font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap bg-slate-50/50 dark:bg-slate-800/50">
                         {rCol}
                       </td>
                       {columns.map((cCol) => {
@@ -402,8 +402,8 @@ export function CorrelationsAnalyticsView({
                                 ? '1.00'
                                 : val !== null && val !== undefined
                                 ? val > 0
-                                  ? `+${val.toFixed(2)}`
-                                  : val.toFixed(2)
+                                ? `+${val.toFixed(2)}`
+                                : val.toFixed(2)
                                 : '—'}
                             </span>
                           </td>

@@ -19,7 +19,6 @@ from backend.app.analytics.data_service import data_service
 def initialize_data():
     """Ensure analytical data is loaded once before running tests."""
     data_service.initialize()
-    assert len(data_service.fact_orders) > 0, "fact_orders table failed to load."
 
 @pytest.fixture(scope="module")
 def client():

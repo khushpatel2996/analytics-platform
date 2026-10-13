@@ -763,5 +763,322 @@ export interface SegmentComparisonResponse {
   takeaways: string[];
 }
 
+export interface MultiDatasetProfileItem {
+  dataset_id: string;
+  filename: string;
+  file_type: string;
+  rows: number;
+  columns: number;
+  profile: DatasetProfileResponse;
+  analysis?: DatasetAnalysisResponse;
+}
+
+export interface MultiDatasetProfileResponse {
+  success: boolean;
+  dataset_count: number;
+  datasets: MultiDatasetProfileItem[];
+}
+
+export interface RelationshipSignals {
+  name_similarity: number;
+  type_compatible: boolean;
+  value_overlap: number;
+  left_unique: boolean;
+  right_unique: boolean;
+  left_null_rate: number;
+  right_null_rate: number;
+  left_unique_values: number;
+  right_unique_values: number;
+  overlap_unique_values: number;
+  overlap_percentage_left: number;
+  overlap_percentage_right: number;
+}
+
+export interface RelationshipCandidate {
+  relationship_id: string;
+  left_dataset: string;
+  left_dataset_id?: string | null;
+  left_column: string;
+  right_dataset: string;
+  right_dataset_id?: string | null;
+  right_column: string;
+  relationship_type: 'one_to_one' | 'one_to_many' | 'many_to_one' | 'many_to_many' | string;
+  confidence: number;
+  match_level: 'Strong Match' | 'Possible Match' | 'Weak Match' | string;
+  signals: RelationshipSignals;
+  explanation: string[];
+  status: 'suggested' | 'accepted' | 'rejected';
+}
+
+export interface RelationshipDetectionResponse {
+  success: boolean;
+  dataset_count: number;
+  relationship_count: number;
+  relationships: RelationshipCandidate[];
+}
+
+export interface DataModelDataset {
+  dataset_id: string;
+  filename: string;
+  rows: number;
+  columns: number;
+  unique_keys: string[];
+  relationship_keys: string[];
+  all_columns: string[];
+}
+
+export interface DataModelRelationship {
+  relationship_id: string;
+  left_dataset: string;
+  left_dataset_id?: string | null;
+  left_column: string;
+  right_dataset: string;
+  right_dataset_id?: string | null;
+  right_column: string;
+  relationship_type: 'one_to_one' | 'one_to_many' | 'many_to_one' | 'many_to_many' | string;
+  confidence: number;
+  status: string;
+  validation_status: 'valid' | 'warning' | 'invalid' | string;
+  validation_notes: string[];
+}
+
+export interface ConnectedComponentGroup {
+  group_id: string;
+  name: string;
+  datasets: string[];
+  relationship_ids: string[];
+}
+
+export interface DataModelSummary {
+  dataset_count: number;
+  relationship_count: number;
+  connected_components: number;
+  independent_count: number;
+  status: 'valid' | 'warning' | 'invalid' | string;
+}
+
+export interface DataModelResponse {
+  success: boolean;
+  model_id: string;
+  status: 'valid' | 'warning' | 'invalid' | string;
+  datasets: DataModelDataset[];
+  relationships: DataModelRelationship[];
+  connected_components: ConnectedComponentGroup[];
+  independent_datasets: DataModelDataset[];
+  warnings: string[];
+  errors: string[];
+  summary: DataModelSummary;
+}
+
+export interface DataModelBuildRequest {
+  accepted_relationships: RelationshipCandidate[];
+  dataset_ids?: string[] | null;
+}
+
+export interface ValidateRelationshipRequest {
+  left_dataset: string;
+  left_column: string;
+  right_dataset: string;
+  right_column: string;
+  relationship_type: string;
+}
+
+export interface ValidateRelationshipResponse {
+  valid: boolean;
+  status: string;
+  notes: string[];
+  candidate?: RelationshipCandidate | null;
+}
+
+// ==========================================
+// Phase 4: Cross-Dataset Analytics Types
+// ==========================================
+
+export interface CrossDatasetKPI {
+  id: string;
+  label: string;
+  value: any;
+  formatted_value: string;
+  subtitle?: string | null;
+  dataset?: string | null;
+  column?: string | null;
+  category: 'volume' | 'financial' | 'average' | 'temporal' | 'count' | string;
+}
+
+export interface CrossDatasetRankingItem {
+  label: string;
+  value: number;
+  formatted_value: string;
+  percentage: number;
+  secondary_value?: number | null;
+  secondary_label?: string | null;
+}
+
+export interface CrossDatasetRanking {
+  id: string;
+  title: string;
+  dimension_dataset: string;
+  dimension_column: string;
+  metric_dataset: string;
+  metric_column: string;
+  join_path: string[];
+  items: CrossDatasetRankingItem[];
+  total_items: number;
+  explanation: string;
+}
+
+export interface HowCalculatedInfo {
+  datasets_used: string[];
+  relationships_used: string[];
+  join_type: string;
+  formula: string;
+  primary_records: number;
+}
+
+export interface CrossDatasetAnalysisCard {
+  id: string;
+  title: string;
+  description: string;
+  primary_dimension: string;
+  primary_metric: string;
+  datasets_involved: string[];
+  join_path_summary: string;
+  chart_type: 'bar' | 'donut' | 'table' | 'line' | string;
+  data: Record<string, any>[];
+  how_calculated: HowCalculatedInfo;
+}
+
+export interface RelationshipHealthItem {
+  relationship_id: string;
+  left_dataset: string;
+  left_column: string;
+  right_dataset: string;
+  right_column: string;
+  relationship_type: string;
+  total_left_keys: number;
+  total_right_keys: number;
+  matched_keys: number;
+  matched_percentage: number;
+  unmatched_count: number;
+  unmatched_percentage: number;
+  duplicate_parent_keys: number;
+  status: 'healthy' | 'warning' | 'critical' | string;
+  notes: string[];
+}
+
+export interface CrossDatasetTrendPoint {
+  date: string;
+  value: number;
+  secondary_value?: number | null;
+  count?: number | null;
+}
+
+export interface CrossDatasetTrend {
+  metric_name: string;
+  date_column: string;
+  dataset: string;
+  granularity: 'day' | 'week' | 'month' | 'year' | string;
+  points: CrossDatasetTrendPoint[];
+}
+
+export interface CrossDatasetInsight {
+  type: 'positive' | 'neutral' | 'attention' | 'metric' | string;
+  text: string;
+  dataset?: string | null;
+  category: 'performance' | 'integrity' | 'volume' | 'distribution' | string;
+}
+
+export interface CrossDatasetGroupAnalytics {
+  group_id: string;
+  name: string;
+  datasets: string[];
+  relationships: string[];
+  kpis: CrossDatasetKPI[];
+  trends?: CrossDatasetTrend | null;
+  has_time_dimension: boolean;
+  rankings: CrossDatasetRanking[];
+  analyses: CrossDatasetAnalysisCard[];
+  available_dimensions: Array<{
+    dataset: string;
+    column: string;
+    distinct_count: number;
+    label: string;
+  }>;
+  available_metrics: Array<{
+    dataset: string;
+    column: string;
+    label: string;
+  }>;
+  available_date_fields?: Array<{
+    dataset: string;
+    column: string;
+    label: string;
+    role: string;
+    is_event_date: boolean;
+    description: string;
+  }>;
+  available_geo_dimensions?: Array<{
+    dataset: string;
+    column: string;
+    label: string;
+    distinct_count: number;
+  }>;
+  has_event_date?: boolean;
+  has_geo_dimension?: boolean;
+  relationship_health: RelationshipHealthItem[];
+  insights: CrossDatasetInsight[];
+  data_quality_summary: {
+    dataset_count: number;
+    total_rows: number;
+    healthy_links: number;
+  };
+}
+
+export interface CrossDatasetAnalyticsResponse {
+  success: boolean;
+  model_id: string;
+  active_group_id: string;
+  groups: CrossDatasetGroupAnalytics[];
+  independent_datasets: Array<{
+    dataset_id: string;
+    filename: string;
+    rows: number;
+    columns: number;
+    status: string;
+  }>;
+  warnings: string[];
+}
+
+export interface CrossDatasetTrendRequest {
+  group_id?: string | null;
+  date_dataset: string;
+  date_column: string;
+  metric_dataset?: string | null;
+  metric_column?: string | null;
+  granularity?: 'day' | 'week' | 'month' | 'quarter' | 'year' | string;
+  filters?: Record<string, any> | null;
+}
+
+export interface CrossDatasetQueryRequest {
+  group_id?: string | null;
+  dimension_dataset: string;
+  dimension_column: string;
+  metric_dataset: string;
+  metric_column: string;
+  aggregation?: 'sum' | 'avg' | 'count' | 'min' | 'max' | string;
+  filters?: Record<string, any> | null;
+  limit?: number;
+}
+
+export interface CrossDatasetQueryResponse {
+  success: boolean;
+  title: string;
+  dimension: string;
+  metric: string;
+  aggregation: string;
+  join_path: string[];
+  items: CrossDatasetRankingItem[];
+  how_calculated: HowCalculatedInfo;
+}
 
 

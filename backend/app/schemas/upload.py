@@ -86,3 +86,130 @@ class DatasetProfileResponse(BaseModel):
     text_columns: List[str]
     empty_columns: List[str]
     data: Optional[Dict[str, Any]] = None
+
+
+class MultiDatasetProfileItem(BaseModel):
+    dataset_id: str = Field(..., description="Unique, safe dataset identifier")
+    filename: str = Field(..., description="Uploaded file name")
+    file_type: str = Field(..., description="File extension (e.g. .csv, .xlsx)")
+    rows: int = Field(..., description="Number of rows in the dataset")
+    columns: int = Field(..., description="Number of columns in the dataset")
+    profile: DatasetProfileResponse = Field(..., description="Detailed profile of the individual dataset")
+    analysis: Optional[Any] = Field(default=None, description="Detailed generic intelligence analysis for the individual dataset")
+
+
+class MultiDatasetProfileResponse(BaseModel):
+    success: bool = True
+    dataset_count: int = Field(..., description="Total count of successfully profiled datasets")
+    datasets: List[MultiDatasetProfileItem] = Field(..., description="List of dataset profiles")
+
+
+class RelationshipSignals(BaseModel):
+    name_similarity: float = Field(..., description="Normalized column name similarity score (0.0 to 1.0)")
+    type_compatible: bool = Field(..., description="Whether data types can be joined or compared")
+    value_overlap: float = Field(..., description="Maximum ratio of non-null value overlap (0.0 to 1.0)")
+    left_unique: bool = Field(..., description="Whether left column contains unique non-null values")
+    right_unique: bool = Field(..., description="Whether right column contains unique non-null values")
+    left_null_rate: float = Field(..., description="Missing value ratio in left column (0.0 to 1.0)")
+    right_null_rate: float = Field(..., description="Missing value ratio in right column (0.0 to 1.0)")
+    left_unique_values: int = Field(default=0, description="Count of distinct values in left column")
+    right_unique_values: int = Field(default=0, description="Count of distinct values in right column")
+    overlap_unique_values: int = Field(default=0, description="Count of shared distinct values")
+    overlap_percentage_left: float = Field(default=0.0, description="Overlap percentage relative to left unique values")
+    overlap_percentage_right: float = Field(default=0.0, description="Overlap percentage relative to right unique values")
+
+
+class RelationshipCandidate(BaseModel):
+    relationship_id: str = Field(..., description="Unique identifier for this suggested relationship")
+    left_dataset: str = Field(..., description="Source dataset filename or display name")
+    left_dataset_id: Optional[str] = Field(None, description="Source dataset identifier")
+    left_column: str = Field(..., description="Source column name")
+    right_dataset: str = Field(..., description="Target dataset filename or display name")
+    right_dataset_id: Optional[str] = Field(None, description="Target dataset identifier")
+    right_column: str = Field(..., description="Target column name")
+    relationship_type: str = Field(..., description="Cardinality: one_to_one, one_to_many, many_to_one, or many_to_many")
+    confidence: int = Field(..., description="Overall confidence score from 0 to 100")
+    match_level: str = Field(..., description="Classification: Strong Match, Possible Match, or Weak Match")
+    signals: RelationshipSignals = Field(..., description="Individual detection signal evaluations")
+    explanation: List[str] = Field(..., description="Human-readable business rationale for why this relationship was detected")
+    status: str = Field(default="suggested", description="Review status: suggested, accepted, or rejected")
+
+
+class RelationshipDetectionRequest(BaseModel):
+    dataset_ids: Optional[List[str]] = Field(None, description="List of cached dataset IDs to evaluate")
+
+
+class RelationshipDetectionResponse(BaseModel):
+    success: bool = True
+    dataset_count: int = Field(..., description="Number of datasets evaluated")
+    relationship_count: int = Field(..., description="Number of detected candidate relationships")
+    relationships: List[RelationshipCandidate] = Field(..., description="Candidate relationships sorted by confidence descending")
+
+
+class DataModelDataset(BaseModel):
+    dataset_id: str = Field(..., description="Unique dataset identifier")
+    filename: str = Field(..., description="Uploaded filename")
+    rows: int = Field(..., description="Total row count")
+    columns: int = Field(..., description="Total column count")
+    unique_keys: List[str] = Field(default_factory=list, description="Columns acting as unique/primary key in relationships")
+    relationship_keys: List[str] = Field(default_factory=list, description="Columns acting as foreign/relationship key in relationships")
+    all_columns: List[str] = Field(default_factory=list, description="List of all available column names")
+
+
+class DataModelRelationship(BaseModel):
+    relationship_id: str = Field(..., description="Unique relationship identifier")
+    left_dataset: str = Field(..., description="Source dataset filename")
+    left_dataset_id: Optional[str] = Field(None, description="Source dataset identifier")
+    left_column: str = Field(..., description="Source column name")
+    right_dataset: str = Field(..., description="Target dataset filename")
+    right_dataset_id: Optional[str] = Field(None, description="Target dataset identifier")
+    right_column: str = Field(..., description="Target column name")
+    relationship_type: str = Field(..., description="Cardinality: one_to_one, one_to_many, many_to_one, or many_to_many")
+    confidence: int = Field(default=100, description="Confidence score")
+    status: str = Field(default="accepted", description="Relationship acceptance status")
+    validation_status: str = Field(default="valid", description="valid, warning, or invalid")
+    validation_notes: List[str] = Field(default_factory=list, description="Explanations of validation results")
+
+
+class ConnectedComponentGroup(BaseModel):
+    group_id: str = Field(..., description="Unique group identifier")
+    name: str = Field(..., description="Human-friendly component group name")
+    datasets: List[str] = Field(..., description="List of dataset filenames in this group")
+    relationship_ids: List[str] = Field(..., description="List of relationship IDs linking this group")
+
+
+class DataModelSummary(BaseModel):
+    dataset_count: int = Field(..., description="Total datasets count")
+    relationship_count: int = Field(..., description="Total relationships count")
+    connected_components: int = Field(..., description="Number of connected groups")
+    independent_count: int = Field(..., description="Number of orphan/independent datasets")
+    status: str = Field(..., description="Overall model status: valid, warning, or invalid")
+
+
+class DataModelResponse(BaseModel):
+    success: bool = True
+    model_id: str = Field(..., description="Unique data model identifier")
+    status: str = Field(..., description="valid, warning, or invalid")
+    datasets: List[DataModelDataset] = Field(..., description="All datasets included in model")
+    relationships: List[DataModelRelationship] = Field(..., description="Validated relationships")
+    connected_components: List[ConnectedComponentGroup] = Field(..., description="Connected groups")
+    independent_datasets: List[DataModelDataset] = Field(default_factory=list, description="Datasets with zero relationships")
+    warnings: List[str] = Field(default_factory=list, description="Model-level warnings")
+    errors: List[str] = Field(default_factory=list, description="Model-level validation errors")
+    summary: DataModelSummary = Field(..., description="Compact metrics summary")
+
+
+class DataModelBuildRequest(BaseModel):
+    accepted_relationships: List[RelationshipCandidate] = Field(default_factory=list, description="List of user-accepted relationship candidates")
+    dataset_ids: Optional[List[str]] = Field(None, description="Optional cached dataset IDs")
+
+
+class ValidateRelationshipRequest(BaseModel):
+    left_dataset: str = Field(..., description="Left dataset filename or ID")
+    left_column: str = Field(..., description="Left column name")
+    right_dataset: str = Field(..., description="Right dataset filename or ID")
+    right_column: str = Field(..., description="Right column name")
+    relationship_type: str = Field(..., description="one_to_one, one_to_many, many_to_one, or many_to_many")
+
+
+

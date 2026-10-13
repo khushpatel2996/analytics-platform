@@ -6,6 +6,8 @@ import { formatLabel } from '@/utils/formatting';
 import { DatasetProvider, useDataset } from '@/context/DatasetContext';
 
 
+import { ThemeProvider } from '@/context/ThemeContext';
+
 // Pages
 import { DashboardPage } from '@/pages/DashboardPage';
 import { SalesPage } from '@/pages/SalesPage';
@@ -33,6 +35,10 @@ const ROUTE_CONFIG: Record<string, { title: string; subtitle: string }> = {
   '/dataset/overview': {
     title: 'Dataset Overview',
     subtitle: 'Statistical distribution, columns, and sample preview of analyzed dataset',
+  },
+  '/dataset/cross-dataset': {
+    title: 'Cross-Dataset Analytics',
+    subtitle: 'Unified cross-dataset intelligence across connected data models',
   },
   '/sales': {
     title: 'Sales Analytics',
@@ -75,7 +81,7 @@ const ROUTE_CONFIG: Record<string, { title: string; subtitle: string }> = {
 function LayoutWrapper() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
-  const { datasetName } = useDataset();
+  const { datasetName, crossAnalytics, dataModel, profile, totalRows } = useDataset();
 
   let currentRoute = ROUTE_CONFIG[location.pathname];
   if (!currentRoute && location.pathname.startsWith('/dataset/')) {
@@ -84,6 +90,11 @@ function LayoutWrapper() {
       currentRoute = {
         title: 'Unusual Values',
         subtitle: 'Identify statistically unusual records that may require further investigation.',
+      };
+    } else if (sub === 'cross-dataset') {
+      currentRoute = {
+        title: 'Cross-Dataset Analytics',
+        subtitle: 'Unified cross-dataset intelligence across connected data models',
       };
     } else {
       currentRoute = {
@@ -99,15 +110,36 @@ function LayoutWrapper() {
   }
 
   let metadataInfo: string | undefined;
-  if (location.pathname.startsWith('/dataset') && datasetName) {
-    metadataInfo = datasetName;
+  if (location.pathname === '/dataset/cross-dataset') {
+    const connected =
+      (crossAnalytics?.groups && crossAnalytics.groups.length > 0
+        ? crossAnalytics.groups[0].datasets
+        : null) ||
+      (dataModel?.connected_components && dataModel.connected_components.length > 0
+        ? dataModel.connected_components[0].datasets
+        : null) ||
+      dataModel?.datasets?.map((d) => d.filename) ||
+      [];
+    const relCount = dataModel?.relationships?.length || 0;
+    if (connected.length > 0) {
+      metadataInfo = `${connected.join(' ↔ ')} · ${connected.length} datasets connected${relCount > 0 ? ` · ${relCount} relationships` : ''}`;
+    } else {
+      metadataInfo = 'Combined Analysis';
+    }
+  } else if (location.pathname.startsWith('/dataset') && datasetName) {
+    const colCount = profile?.columns?.length || profile?.dataset?.columns || 0;
+    const parts = [
+      datasetName,
+      totalRows ? `${totalRows.toLocaleString()} rows` : null,
+      colCount ? `${colCount} cols` : null,
+    ].filter(Boolean);
+    metadataInfo = parts.join(' · ');
   } else {
-    metadataInfo = 'Generic Dataset Intelligence';
+    metadataInfo = undefined;
   }
 
-
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50">
+    <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200">
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
@@ -148,11 +180,13 @@ function LayoutWrapper() {
 
 export function App() {
   return (
-    <BrowserRouter>
-      <DatasetProvider>
-        <LayoutWrapper />
-      </DatasetProvider>
-    </BrowserRouter>
+    <ThemeProvider>
+      <BrowserRouter>
+        <DatasetProvider>
+          <LayoutWrapper />
+        </DatasetProvider>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }
 
